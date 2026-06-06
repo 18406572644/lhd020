@@ -93,8 +93,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
 
 const resumeStore = useResumeStore()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -166,6 +164,9 @@ async function handleExportCommand(command: string) {
 
 async function exportToPDF(element: HTMLElement) {
   try {
+    const { default: html2canvas } = await import('html2canvas')
+    const { default: jsPDF } = await import('jspdf')
+    
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
@@ -194,6 +195,8 @@ async function exportToPDF(element: HTMLElement) {
 
 async function exportToImage(element: HTMLElement) {
   try {
+    const { default: html2canvas } = await import('html2canvas')
+    
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,

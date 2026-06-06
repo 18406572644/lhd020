@@ -20,8 +20,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import html2canvas from 'html2canvas'
+import { ElMessage, type FormInstance } from 'element-plus'
 
 const props = defineProps<{
   visible: boolean
@@ -55,6 +54,8 @@ async function generateThumbnail(): Promise<string> {
   if (!resumeEl) return ''
   
   try {
+    const { default: html2canvas } = await import('html2canvas')
+    
     const canvas = await html2canvas(resumeEl, {
       scale: 0.5,
       useCORS: true,
