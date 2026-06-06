@@ -43,18 +43,6 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['jspdf', 'html2canvas'],
       exclude: []
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            'pdf-libs': ['jspdf', 'html2canvas']
-          }
-        }
-      },
-      commonjsOptions: {
-        transformMixedEsModules: true
-      }
     }
   },
 
