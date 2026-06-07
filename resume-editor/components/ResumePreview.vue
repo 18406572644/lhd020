@@ -3,7 +3,7 @@
     <div class="preview-header no-print">
       <h2 class="preview-title">简历预览</h2>
       <div class="preview-actions">
-        <el-radio-group v-model="zoomLevel" size="small">
+        <el-radio-group v-model="zoomLevel" size="small" :disabled="resumeStore.loading || !resumeStore.resumeData">
           <el-radio-button :label="0.75">75%</el-radio-button>
           <el-radio-button :label="1">100%</el-radio-button>
           <el-radio-button :label="1.25">125%</el-radio-button>
@@ -13,13 +13,22 @@
     </div>
     
     <div class="preview-container">
-      <div 
-        class="resume-preview-content"
-        :class="[`template-${resumeStore.resumeData?.template || 'modern'}`, `layout-${currentTemplate?.layout || 'double'}`]"
-        :style="previewStyle"
-        ref="previewRef"
-      >
-        <template v-if="resumeStore.resumeData">
+      <ClientOnly>
+        <div v-if="resumeStore.loading" class="loading-container">
+          <el-icon class="is-loading"><Loading /></el-icon>
+          <span class="loading-text">正在加载简历数据...</span>
+        </div>
+        
+        <div v-else-if="!resumeStore.resumeData" class="empty-container">
+          <el-empty description="暂无简历数据" />
+        </div>
+        
+        <div v-else
+          class="resume-preview-content"
+          :class="[`template-${resumeStore.resumeData?.template || 'modern'}`, `layout-${currentTemplate?.layout || 'double'}`]"
+          :style="previewStyle"
+          ref="previewRef"
+        >
           <!-- 基本信息头部 -->
           <header class="resume-header">
             <div class="header-content">
@@ -187,15 +196,15 @@
               </template>
             </div>
           </div>
-        </template>
-      </div>
+        </div>
+      </ClientOnly>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { templateConfigs } from '@/data/mockData'
+import { Loading } from '@element-plus/icons-vue'
 import type { ResumeModule } from '@/types/resume'
 
 const resumeStore = useResumeStore()
@@ -203,8 +212,8 @@ const zoomLevel = ref(0.75)
 const previewRef = ref<HTMLElement | null>(null)
 
 const currentTemplate = computed(() => {
-  if (!resumeStore.resumeData) return null
-  return templateConfigs.find(t => t.id === resumeStore.resumeData!.template)
+  if (!resumeStore.resumeData || !resumeStore.templates?.length) return null
+  return resumeStore.templates.find(t => t.id === resumeStore.resumeData!.template)
 })
 
 const previewStyle = computed(() => {
@@ -266,6 +275,26 @@ const visibleSideModules = computed(() => {
     padding: $spacing-2xl;
     display: flex;
     justify-content: center;
+    align-items: center;
+  }
+  
+  .loading-container,
+  .empty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-base;
+    color: $color-gray-500;
+    padding: $spacing-4xl;
+    
+    .el-icon {
+      font-size: 48px;
+    }
+    
+    .loading-text {
+      font-size: $font-size-lg;
+    }
   }
   
   .resume-preview-content {

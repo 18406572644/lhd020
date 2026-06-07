@@ -1,60 +1,77 @@
 <template>
-  <el-popover placement="bottom" :width="320" trigger="click">
-    <template #reference>
-      <el-button>
-        <el-icon><Sort /></el-icon>
-        <span>模块排序</span>
-      </el-button>
-    </template>
-    
-    <div class="module-sorter">
-      <h3 class="title">简历模块管理</h3>
-      <p class="subtitle">拖拽调整顺序，开关控制显示</p>
+  <ClientOnly>
+    <el-popover placement="bottom" :width="320" trigger="click" :disabled="resumeStore.loading">
+      <template #reference>
+        <el-button :loading="resumeStore.loading">
+          <el-icon><Sort /></el-icon>
+          <span>模块排序</span>
+        </el-button>
+      </template>
       
-      <div ref="sortableContainer" class="module-list">
-        <div
-          v-for="module in sortedModules"
-          :key="module.id"
-          :data-id="module.id"
-          class="module-item"
-        >
-          <div class="drag-handle">
-            <el-icon><Rank /></el-icon>
-          </div>
-          <span class="module-title">{{ module.title }}</span>
-          <div class="module-actions">
-            <el-switch
-              :model-value="module.visible"
-              size="small"
-              @change="(val: boolean) => handleVisibilityChange(module.id, val)"
-            />
+      <div class="module-sorter">
+        <h3 class="title">简历模块管理</h3>
+        <p class="subtitle">拖拽调整顺序，开关控制显示</p>
+        
+        <div v-if="resumeStore.loading" class="empty-state">
+          <span>加载中...</span>
+        </div>
+        
+        <div v-else-if="!sortedModules || sortedModules.length === 0" class="empty-state">
+          <span>暂无模块数据</span>
+        </div>
+        
+        <div v-else ref="sortableContainer" class="module-list">
+          <div
+            v-for="module in sortedModules"
+            :key="module.id"
+            :data-id="module.id"
+            class="module-item"
+          >
+            <div class="drag-handle">
+              <el-icon><Rank /></el-icon>
+            </div>
+            <span class="module-title">{{ module.title }}</span>
+            <div class="module-actions">
+              <el-switch
+                :model-value="module.visible"
+                size="small"
+                @change="(val: boolean) => handleVisibilityChange(module.id, val)"
+              />
+            </div>
           </div>
         </div>
+        
+        <div class="tip">
+          <el-icon><InfoFilled /></el-icon>
+          <span>拖动左侧图标调整模块显示顺序</span>
+        </div>
       </div>
-      
-      <div class="tip">
-        <el-icon><InfoFilled /></el-icon>
-        <span>拖动左侧图标调整模块显示顺序</span>
-      </div>
-    </div>
-  </el-popover>
+    </el-popover>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
-import Sortable from 'sortablejs'
+import { ref, watch, onMounted, nextTick, computed } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const resumeStore = useResumeStore()
 const sortableContainer = ref<HTMLElement | null>(null)
-let sortableInstance: Sortable | null = null
+let sortableInstance: any = null
 
-const sortedModules = ref([...resumeStore.resumeData?.modules || []].sort((a, b) => a.order - b.order))
+const sortedModules = computed(() => {
+  if (!resumeStore.resumeData?.modules) return []
+  return [...resumeStore.resumeData.modules].sort((a, b) => a.order - b.order)
+})
 
 watch(
   () => resumeStore.resumeData?.modules,
   (modules) => {
-    if (modules) {
-      sortedModules.value = [...modules].sort((a, b) => a.order - b.order)
+    if (modules && sortableInstance) {
+      sortableInstance.sort(
+        [...modules]
+          .sort((a, b) => a.order - b.order)
+          .map(m => m.id)
+      )
     }
   },
   { deep: true }
@@ -62,14 +79,21 @@ watch(
 
 onMounted(async () => {
   await nextTick()
-  if (sortableContainer.value) {
+  if (!sortableContainer.value) return
+  
+  if (!resumeStore.resumeData?.modules) {
+    return
+  }
+  
+  try {
+    const { default: Sortable } = await import('sortablejs')
     sortableInstance = Sortable.create(sortableContainer.value, {
       animation: 150,
       handle: '.drag-handle',
       ghostClass: 'sortable-ghost',
       chosenClass: 'sortable-chosen',
       dragClass: 'sortable-drag',
-      onEnd: (evt) => {
+      onEnd: (evt: any) => {
         const { oldIndex, newIndex } = evt
         if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
           const items = [...sortedModules.value]
@@ -82,10 +106,12 @@ onMounted(async () => {
           }))
           
           resumeStore.updateModuleOrder(orderUpdates)
-          sortedModules.value = items
         }
       }
     })
+  } catch (error) {
+    console.error('初始化拖拽排序失败:', error)
+    ElMessage.error('拖拽功能初始化失败')
   }
 })
 
@@ -105,6 +131,15 @@ function handleVisibilityChange(moduleId: string, visible: boolean) {
   
   .subtitle {
     font-size: $font-size-sm;
+    color: $color-gray-500;
+    margin-bottom: $spacing-lg;
+  }
+  
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xl * 2;
     color: $color-gray-500;
     margin-bottom: $spacing-lg;
   }

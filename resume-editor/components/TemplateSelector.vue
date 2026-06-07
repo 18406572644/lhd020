@@ -1,68 +1,98 @@
 <template>
-  <el-popover placement="bottom-start" :width="560" trigger="click">
-    <template #reference>
-      <el-button>
-        <el-icon><MagicStick /></el-icon>
-        <span>选择模板</span>
-      </el-button>
-    </template>
-    
-    <div class="template-selector">
-      <h3 class="title">选择简历模板</h3>
-      <div class="template-grid">
-        <div
-          v-for="template in resumeStore.templates"
-          :key="template.id"
-          class="template-item"
-          :class="{ active: resumeStore.resumeData?.template === template.id }"
-          @click="handleSelectTemplate(template.id)"
-        >
-          <div 
-            class="template-preview"
-            :style="{ 
-              '--primary': template.primaryColor, 
-              '--secondary': template.secondaryColor 
-            }"
+  <ClientOnly>
+    <el-popover placement="bottom-start" :width="560" trigger="click" :disabled="resumeStore.loading">
+      <template #reference>
+        <el-button :loading="resumeStore.loading">
+          <el-icon><MagicStick /></el-icon>
+          <span>选择模板</span>
+        </el-button>
+      </template>
+      
+      <div class="template-selector">
+        <h3 class="title">选择简历模板</h3>
+        
+        <div v-if="resumeStore.loading" class="loading-state">
+          <el-icon class="is-loading"><Loading /></el-icon>
+          <span>加载中...</span>
+        </div>
+        
+        <div v-else-if="!resumeStore.templates || resumeStore.templates.length === 0" class="empty-state">
+          <el-empty description="暂无可用模板" />
+        </div>
+        
+        <div v-else class="template-grid">
+          <div
+            v-for="template in resumeStore.templates"
+            :key="template.id"
+            class="template-item"
+            :class="{ active: resumeStore.resumeData?.template === template.id }"
+            @click="handleSelectTemplate(template.id)"
           >
-            <div class="preview-header">
-              <div class="preview-name"></div>
-              <div class="preview-title"></div>
-            </div>
-            <div class="preview-body" :class="template.layout">
-              <div class="preview-section">
-                <div class="preview-line short"></div>
-                <div class="preview-line"></div>
-                <div class="preview-line"></div>
+            <div 
+              class="template-preview"
+              :style="{ 
+                '--primary': template.primaryColor, 
+                '--secondary': template.secondaryColor 
+              }"
+            >
+              <div class="preview-header">
+                <div class="preview-name"></div>
+                <div class="preview-title"></div>
               </div>
-              <div class="preview-section">
-                <div class="preview-line short"></div>
-                <div class="preview-line"></div>
-                <div class="preview-line short"></div>
+              <div class="preview-body" :class="template.layout">
+                <div class="preview-section">
+                  <div class="preview-line short"></div>
+                  <div class="preview-line"></div>
+                  <div class="preview-line"></div>
+                </div>
+                <div class="preview-section">
+                  <div class="preview-line short"></div>
+                  <div class="preview-line"></div>
+                  <div class="preview-line short"></div>
+                </div>
               </div>
             </div>
+            <div class="template-info">
+              <div class="template-name">{{ template.name }}</div>
+              <div class="template-desc">{{ template.description }}</div>
+            </div>
+            <el-icon v-if="resumeStore.resumeData?.template === template.id" class="check-icon">
+              <Check />
+            </el-icon>
           </div>
-          <div class="template-info">
-            <div class="template-name">{{ template.name }}</div>
-            <div class="template-desc">{{ template.description }}</div>
-          </div>
-          <el-icon v-if="resumeStore.resumeData?.template === template.id" class="check-icon">
-            <Check />
-          </el-icon>
         </div>
       </div>
-    </div>
-  </el-popover>
+    </el-popover>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import type { TemplateType } from '@/types/resume'
+import { Loading } from '@element-plus/icons-vue'
 
 const resumeStore = useResumeStore()
 
 async function handleSelectTemplate(templateId: string) {
-  await resumeStore.switchTemplate(templateId)
-  ElMessage.success(`已切换到${resumeStore.templates.find(t => t.id === templateId)?.name}模板`)
+  if (!resumeStore.resumeData) {
+    ElMessage.warning('简历数据正在初始化，请稍候...')
+    return
+  }
+  
+  if (!resumeStore.templates || resumeStore.templates.length === 0) {
+    ElMessage.warning('模板数据加载中，请稍候...')
+    return
+  }
+  
+  try {
+    await resumeStore.switchTemplate(templateId)
+    const template = resumeStore.templates.find(t => t.id === templateId)
+    if (template) {
+      ElMessage.success(`已切换到${template.name}模板`)
+    }
+  } catch (error) {
+    console.error('切换模板失败:', error)
+    ElMessage.error('切换模板失败')
+  }
 }
 </script>
 
@@ -73,6 +103,36 @@ async function handleSelectTemplate(templateId: string) {
     font-weight: 600;
     margin-bottom: $spacing-lg;
     color: $color-gray-800;
+  }
+  
+  .loading-state,
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xl * 2;
+    color: $color-gray-500;
+    gap: $spacing-sm;
+    
+    .el-icon {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  .loading-state {
+    .is-loading {
+      animation: rotating 1s linear infinite;
+    }
+  }
+  
+  @keyframes rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
   
   .template-grid {

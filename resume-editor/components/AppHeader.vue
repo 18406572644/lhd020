@@ -14,79 +14,91 @@
       </el-space>
     </div>
     
-    <div class="header-right">
-      <el-space>
-        <el-button @click="handleSave" :loading="resumeStore.saving">
-          <el-icon><Save /></el-icon>
-          <span>保存</span>
-        </el-button>
-        
-        <el-dropdown @command="handleExportCommand">
-          <el-button type="primary">
-            <el-icon><Download /></el-icon>
-            <span>导出</span>
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+    <ClientOnly>
+      <div class="header-right">
+        <el-space>
+          <el-button 
+            @click="handleSave" 
+            :loading="resumeStore.saving"
+            :disabled="resumeStore.loading || !resumeStore.resumeData"
+          >
+            <el-icon><Save /></el-icon>
+            <span>保存</span>
           </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="pdf">
-                <el-icon><Document /></el-icon>
-                导出 PDF
-              </el-dropdown-item>
-              <el-dropdown-item command="image">
-                <el-icon><Picture /></el-icon>
-                导出图片
-              </el-dropdown-item>
-              <el-dropdown-item command="json">
-                <el-icon><Files /></el-icon>
-                导出 JSON
-              </el-dropdown-item>
-              <el-dropdown-item command="print">
-                <el-icon><Printer /></el-icon>
-                打印
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        
-        <el-dropdown @command="handleMoreCommand">
-          <el-button>
-            <el-icon><MoreFilled /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="library">
-                <el-icon><FolderOpened /></el-icon>
-                我的简历库
-              </el-dropdown-item>
-              <el-dropdown-item command="import">
-                <el-icon><Upload /></el-icon>
-                导入 JSON
-              </el-dropdown-item>
-              <el-dropdown-item command="save-library">
-                <el-icon><Star /></el-icon>
-                保存到简历库
-              </el-dropdown-item>
-              <el-dropdown-item divided command="reset">
-                <el-icon><RefreshRight /></el-icon>
-                重置模板
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </el-space>
-    </div>
-    
-    <input
-      ref="fileInput"
-      type="file"
-      accept=".json"
-      style="display: none"
-      @change="handleFileChange"
-    />
-    
-    <LibraryDialog v-model:visible="libraryVisible" />
-    <SaveDialog v-model:visible="saveDialogVisible" />
+          
+          <el-dropdown 
+            @command="handleExportCommand"
+            :disabled="resumeStore.loading || !resumeStore.resumeData"
+          >
+            <el-button type="primary">
+              <el-icon><Download /></el-icon>
+              <span>导出</span>
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="pdf">
+                  <el-icon><Document /></el-icon>
+                  导出 PDF
+                </el-dropdown-item>
+                <el-dropdown-item command="image">
+                  <el-icon><Picture /></el-icon>
+                  导出图片
+                </el-dropdown-item>
+                <el-dropdown-item command="json">
+                  <el-icon><Files /></el-icon>
+                  导出 JSON
+                </el-dropdown-item>
+                <el-dropdown-item command="print">
+                  <el-icon><Printer /></el-icon>
+                  打印
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          
+          <el-dropdown 
+            @command="handleMoreCommand"
+            :disabled="resumeStore.loading"
+          >
+            <el-button>
+              <el-icon><MoreFilled /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="library">
+                  <el-icon><FolderOpened /></el-icon>
+                  我的简历库
+                </el-dropdown-item>
+                <el-dropdown-item command="import">
+                  <el-icon><Upload /></el-icon>
+                  导入 JSON
+                </el-dropdown-item>
+                <el-dropdown-item command="save-library" :disabled="!resumeStore.resumeData">
+                  <el-icon><Star /></el-icon>
+                  保存到简历库
+                </el-dropdown-item>
+                <el-dropdown-item divided command="reset">
+                  <el-icon><RefreshRight /></el-icon>
+                  重置模板
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </el-space>
+      </div>
+      
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".json"
+        style="display: none"
+        @change="handleFileChange"
+      />
+      
+      <LibraryDialog v-model:visible="libraryVisible" />
+      <SaveDialog v-model:visible="saveDialogVisible" />
+    </ClientOnly>
   </header>
 </template>
 
@@ -102,6 +114,8 @@ const saveDialogVisible = ref(false)
 // 自动保存
 let autoSaveTimer: ReturnType<typeof setTimeout> | null = null
 
+let handleKeydown: ((e: KeyboardEvent) => void) | null = null
+
 onMounted(() => {
   autoSaveTimer = setInterval(() => {
     if (resumeStore.resumeData) {
@@ -109,27 +123,29 @@ onMounted(() => {
     }
   }, 30000)
   
-  // 键盘快捷键
-  const handleKeydown = (e: KeyboardEvent) => {
+  handleKeydown = (e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault()
       handleSave()
     }
   }
   window.addEventListener('keydown', handleKeydown)
-  
-  onUnmounted(() => {
-    window.removeEventListener('keydown', handleKeydown)
-  })
 })
 
 onUnmounted(() => {
   if (autoSaveTimer) {
     clearInterval(autoSaveTimer)
   }
+  if (handleKeydown) {
+    window.removeEventListener('keydown', handleKeydown)
+  }
 })
 
 async function handleSave() {
+  if (!resumeStore.resumeData) {
+    ElMessage.warning('简历数据未初始化，请稍候...')
+    return
+  }
   const success = await resumeStore.saveResume()
   if (success) {
     ElMessage.success('保存成功')
@@ -139,6 +155,11 @@ async function handleSave() {
 }
 
 async function handleExportCommand(command: string) {
+  if (!resumeStore.resumeData) {
+    ElMessage.warning('简历数据未初始化，请稍候...')
+    return
+  }
+  
   const resumeEl = document.querySelector('.resume-preview-content') as HTMLElement
   if (!resumeEl) {
     ElMessage.error('找不到预览内容')
