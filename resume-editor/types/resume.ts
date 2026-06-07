@@ -102,6 +102,50 @@ export interface ResumeData {
   template: TemplateType
 }
 
+// 投递状态
+export type DeliveryStatus = 'pending' | 'interviewing' | 'offered' | 'rejected'
+
+// 行业分类
+export type IndustryCategory = 
+  | 'internet' 
+  | 'finance' 
+  | 'education' 
+  | 'healthcare' 
+  | 'manufacturing' 
+  | 'retail' 
+  | 'media' 
+  | 'government' 
+  | 'other'
+
+// 投递状态配置
+export interface DeliveryStatusConfig {
+  value: DeliveryStatus
+  label: string
+  color: string
+}
+
+// 行业配置
+export interface IndustryConfig {
+  value: IndustryCategory
+  label: string
+}
+
+// 标签
+export interface ResumeTag {
+  id: string
+  name: string
+  color: string
+}
+
+// 评分
+export interface ResumeScore {
+  overall: number
+  experience: number
+  skills: number
+  education: number
+  projects: number
+}
+
 // 保存的简历记录
 export interface SavedResume {
   id: string
@@ -110,6 +154,74 @@ export interface SavedResume {
   updatedAt: string
   data: ResumeData
   thumbnail: string
+  tags: string[]
+  deliveryStatus: DeliveryStatus
+  targetIndustry: IndustryCategory
+  targetPosition: string
+  score: ResumeScore
+}
+
+// 时间范围筛选
+export interface TimeRangeFilter {
+  field: 'createdAt' | 'updatedAt'
+  startDate: string | null
+  endDate: string | null
+}
+
+// 筛选条件
+export interface FilterConditions {
+  timeRange: TimeRangeFilter | null
+  templateTypes: TemplateType[]
+  tags: string[]
+  deliveryStatuses: DeliveryStatus[]
+  targetIndustries: IndustryCategory[]
+  targetPosition: string
+  keyword: string
+}
+
+// 排序选项
+export type SortOption = 'relevance' | 'createdAt_desc' | 'createdAt_asc' | 'updatedAt_desc' | 'updatedAt_asc' | 'score_desc' | 'score_asc'
+
+export interface SortConfig {
+  value: SortOption
+  label: string
+}
+
+// 搜索结果
+export interface SearchResult {
+  resume: SavedResume
+  relevanceScore: number
+  matchedKeywords: string[]
+  matchedFields: string[]
+}
+
+// 智能文件夹
+export interface SmartFolder {
+  id: string
+  name: string
+  description: string
+  filterConditions: FilterConditions
+  sortOption: SortOption
+  createdAt: string
+  updatedAt: string
+  icon: string
+  color: string
+}
+
+// 相似度搜索结果
+export interface SimilarityResult {
+  resume: SavedResume
+  similarityScore: number
+  similarFields: string[]
+}
+
+// 自然语言解析结果
+export interface NLPParseResult {
+  success: boolean
+  filterConditions: Partial<FilterConditions>
+  sortOption: SortOption | null
+  rawQuery: string
+  parsedQuery: string
 }
 
 // API 响应

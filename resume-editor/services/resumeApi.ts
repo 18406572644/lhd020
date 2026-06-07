@@ -7,9 +7,13 @@ import type {
   FieldDiff, 
   DiffType,
   SnapshotType,
-  VersionCompareResult 
+  VersionCompareResult,
+  DeliveryStatus,
+  IndustryCategory,
+  ResumeScore
 } from '@/types/resume'
 import { defaultResumeData, templateConfigs, generateId } from '@/data/mockData'
+import { searchService } from '@/services/searchService'
 
 const STORAGE_KEY = 'resume_editor_data'
 const SAVED_RESUMES_KEY = 'saved_resumes'
@@ -120,7 +124,17 @@ export const savedResumesApi = {
   },
 
   // 保存简历到列表
-  async save(name: string, data: ResumeData, thumbnail: string = ''): Promise<ApiResponse<SavedResume>> {
+  async save(
+    name: string, 
+    data: ResumeData, 
+    thumbnail: string = '',
+    metadata?: {
+      tags?: string[]
+      deliveryStatus?: DeliveryStatus
+      targetIndustry?: IndustryCategory
+      targetPosition?: string
+    }
+  ): Promise<ApiResponse<SavedResume>> {
     await delay(500)
     if (typeof window === 'undefined') {
       return { success: false, message: '仅支持浏览器端操作' }
@@ -129,13 +143,20 @@ export const savedResumesApi = {
     const saved = localStorage.getItem(SAVED_RESUMES_KEY)
     const list: SavedResume[] = saved ? JSON.parse(saved) : []
     
+    const score = searchService.calculateResumeScore(data)
+    
     const newResume: SavedResume = {
       id: generateId(),
       name,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       data: JSON.parse(JSON.stringify(data)),
-      thumbnail
+      thumbnail,
+      tags: metadata?.tags || [],
+      deliveryStatus: metadata?.deliveryStatus || 'pending',
+      targetIndustry: metadata?.targetIndustry || 'internet',
+      targetPosition: metadata?.targetPosition || data.basicInfo?.jobTitle || '',
+      score
     }
     
     list.unshift(newResume)
@@ -149,8 +170,67 @@ export const savedResumesApi = {
   },
 
   // 更新保存的简历
-  async update(id: string, name: string, data: ResumeData, thumbnail: string = ''): Promise<ApiResponse<SavedResume>> {
+  async update(
+    id: string, 
+    name: string, 
+    data: ResumeData, 
+    thumbnail: string = '',
+    metadata?: {
+      tags?: string[]
+      deliveryStatus?: DeliveryStatus
+      targetIndustry?: IndustryCategory
+      targetPosition?: string
+    }
+  ): Promise<ApiResponse<SavedResume>> {
     await delay(500)
+    if (typeof window === 'undefined') {
+      return { success: false, message: '仅支持浏览器端操作' }
+    }
+
+    const saved = localStorage.getItem(SAVED_RESUMES_KEY)
+    const list: SavedResume[] = saved ? JSON.parse(saved) : []
+    
+    const index = list.findIndex(item => item.id === id)
+    if (index === -1) {
+      return { success: false, message: '简历不存在' }
+    }
+    
+    const score = searchService.calculateResumeScore(data)
+    
+    list[index] = {
+      ...list[index],
+      name,
+      data: JSON.parse(JSON.stringify(data)),
+      thumbnail,
+      tags: metadata?.tags !== undefined ? metadata.tags : list[index].tags,
+      deliveryStatus: metadata?.deliveryStatus || list[index].deliveryStatus,
+      targetIndustry: metadata?.targetIndustry || list[index].targetIndustry,
+      targetPosition: metadata?.targetPosition !== undefined ? metadata.targetPosition : list[index].targetPosition,
+      score,
+      updatedAt: new Date().toISOString()
+    }
+    
+    localStorage.setItem(SAVED_RESUMES_KEY, JSON.stringify(list))
+    
+    return {
+      success: true,
+      data: list[index],
+      message: '简历更新成功'
+    }
+  },
+
+  // 仅更新简历元数据
+  async updateMetadata(
+    id: string,
+    metadata: {
+      name?: string
+      tags?: string[]
+      deliveryStatus?: DeliveryStatus
+      targetIndustry?: IndustryCategory
+      targetPosition?: string
+    }
+  ): Promise<ApiResponse<SavedResume>> {
+    await delay(300)
     if (typeof window === 'undefined') {
       return { success: false, message: '仅支持浏览器端操作' }
     }
@@ -165,9 +245,7 @@ export const savedResumesApi = {
     
     list[index] = {
       ...list[index],
-      name,
-      data: JSON.parse(JSON.stringify(data)),
-      thumbnail,
+      ...metadata,
       updatedAt: new Date().toISOString()
     }
     
@@ -176,7 +254,7 @@ export const savedResumesApi = {
     return {
       success: true,
       data: list[index],
-      message: '简历更新成功'
+      message: '元数据更新成功'
     }
   },
 
