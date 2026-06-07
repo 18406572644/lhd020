@@ -5,9 +5,27 @@
         <el-icon :size="24" color="#ffffff"><Document /></el-icon>
         <span class="logo-text">简历编辑器</span>
       </div>
+      <nav class="header-nav">
+        <router-link 
+          to="/" 
+          class="nav-link" 
+          :class="{ active: $route.path === '/' }"
+        >
+          <el-icon><Edit /></el-icon>
+          <span>简历编辑</span>
+        </router-link>
+        <router-link 
+          to="/salary" 
+          class="nav-link" 
+          :class="{ active: $route.path === '/salary' }"
+        >
+          <el-icon><TrendCharts /></el-icon>
+          <span>薪资预估</span>
+        </router-link>
+      </nav>
     </div>
     
-    <div class="header-center">
+    <div class="header-center" v-if="$route.path === '/'">
       <el-space>
         <template-selector />
         <module-sorter />
@@ -105,6 +123,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { TrendCharts, Edit } from '@element-plus/icons-vue'
 
 const resumeStore = useResumeStore()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -298,6 +317,7 @@ async function handleFileChange(e: Event) {
   .header-left {
     display: flex;
     align-items: center;
+    gap: $spacing-2xl;
   }
   
   .logo {
@@ -310,6 +330,34 @@ async function handleFileChange(e: Event) {
       font-size: $font-size-lg;
       font-weight: 600;
       letter-spacing: 1px;
+    }
+  }
+
+  .header-nav {
+    display: flex;
+    gap: $spacing-sm;
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-sm $spacing-lg;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: $font-size-base;
+      border-radius: $border-radius-base;
+      transition: $transition-base;
+      text-decoration: none;
+
+      &:hover {
+        color: $color-white;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &.active {
+        color: $color-white;
+        background: rgba(255, 255, 255, 0.2);
+        font-weight: 500;
+      }
     }
   }
   
