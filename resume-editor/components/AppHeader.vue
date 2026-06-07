@@ -44,6 +44,14 @@
             <span>保存</span>
           </el-button>
           
+          <el-button 
+            @click="handleOpenHistory"
+            :disabled="resumeStore.loading"
+          >
+            <el-icon><Clock /></el-icon>
+            <span>历史版本</span>
+          </el-button>
+          
           <el-dropdown 
             @command="handleExportCommand"
             :disabled="resumeStore.loading || !resumeStore.resumeData"
@@ -96,6 +104,10 @@
                   <el-icon><Star /></el-icon>
                   保存到简历库
                 </el-dropdown-item>
+                <el-dropdown-item command="history">
+                  <el-icon><Clock /></el-icon>
+                  历史版本
+                </el-dropdown-item>
                 <el-dropdown-item divided command="reset">
                   <el-icon><RefreshRight /></el-icon>
                   重置模板
@@ -116,6 +128,8 @@
       
       <LibraryDialog v-model:visible="libraryVisible" />
       <SaveDialog v-model:visible="saveDialogVisible" />
+      <VersionHistoryPanel />
+      <VersionCompareDialog />
     </ClientOnly>
   </header>
 </template>
@@ -123,9 +137,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { TrendCharts, Edit } from '@element-plus/icons-vue'
+import { TrendCharts, Edit, Clock } from '@element-plus/icons-vue'
 
 const resumeStore = useResumeStore()
+const versionHistoryStore = useVersionHistoryStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 const libraryVisible = ref(false)
 const saveDialogVisible = ref(false)
@@ -138,7 +153,7 @@ let handleKeydown: ((e: KeyboardEvent) => void) | null = null
 onMounted(() => {
   autoSaveTimer = setInterval(() => {
     if (resumeStore.resumeData) {
-      resumeStore.saveResume()
+      resumeStore.autoSave()
     }
   }, 30000)
   
@@ -165,12 +180,16 @@ async function handleSave() {
     ElMessage.warning('简历数据未初始化，请稍候...')
     return
   }
-  const success = await resumeStore.saveResume()
+  const success = await resumeStore.saveResume('manual')
   if (success) {
     ElMessage.success('保存成功')
   } else {
     ElMessage.error('保存失败')
   }
+}
+
+function handleOpenHistory() {
+  versionHistoryStore.togglePanel()
 }
 
 async function handleExportCommand(command: string) {
@@ -265,6 +284,9 @@ async function handleMoreCommand(command: string) {
       break
     case 'save-library':
       saveDialogVisible.value = true
+      break
+    case 'history':
+      handleOpenHistory()
       break
     case 'reset':
       try {

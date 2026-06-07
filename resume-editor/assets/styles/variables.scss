@@ -81,3 +81,36 @@ $transition-slow: all 0.3s ease;
 // A4 尺寸
 $a4-width: 210mm;
 $a4-height: 297mm;
+
+// Element Plus 主题色
+$color-success: #67c23a;
+$color-warning: #e6a23c;
+$color-danger: #f56c6c;
+$color-info: #909399;
+
+// 浅色变体
+$color-primary-lighter: #ecf5ff;
+$color-primary-light: #79bbff;
+$color-success-lighter: #f0f9eb;
+$color-success-light: #95d475;
+$color-warning-lighter: #fdf6ec;
+$color-warning-light: #f3d19e;
+$color-danger-lighter: #fef0f0;
+$color-danger-light: #f89898;
+$color-info-lighter: #f4f4f5;
+$color-info-light: #c0c4cc;
+
+// 文本颜色
+$text-color-primary: #303133;
+$text-color-secondary: #606266;
+$text-color-placeholder: #909399;
+
+// 边框颜色
+$border-color-lighter: #ebeef5;
+$border-color-light: #e4e7ed;
+
+// 背景色
+$color-bg-page: #f5f7fa;
+
+// 阴影
+$shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);

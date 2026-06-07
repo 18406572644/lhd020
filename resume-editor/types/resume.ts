@@ -117,3 +117,40 @@ export interface ApiResponse<T> {
   data?: T
   message?: string
 }
+
+// 版本快照类型
+export type SnapshotType = 'manual' | 'auto'
+
+// 差异类型
+export type DiffType = 'added' | 'removed' | 'modified'
+
+// 字段差异
+export interface FieldDiff {
+  path: string
+  type: DiffType
+  oldValue?: any
+  newValue?: any
+}
+
+// 版本快照
+export interface VersionSnapshot {
+  id: string
+  createdAt: string
+  type: SnapshotType
+  data: ResumeData
+  summary: string
+  isMilestone: boolean
+  diffs?: FieldDiff[]
+}
+
+// 版本对比结果
+export interface VersionCompareResult {
+  version1: VersionSnapshot
+  version2: VersionSnapshot
+  diffs: FieldDiff[]
+  stats: {
+    added: number
+    removed: number
+    modified: number
+  }
+}

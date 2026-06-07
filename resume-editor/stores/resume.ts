@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { ResumeData, TemplateConfig, ModuleType, Education, WorkExperience, Project, Skill, Certificate } from '@/types/resume'
-import { resumeApi, savedResumesApi, exportApi } from '@/services/resumeApi'
+import type { ResumeData, TemplateConfig, ModuleType, Education, WorkExperience, Project, Skill, Certificate, SnapshotType } from '@/types/resume'
+import { resumeApi, savedResumesApi, exportApi, versionHistoryApi } from '@/services/resumeApi'
 import { generateId } from '@/data/mockData'
 
 export const useResumeStore = defineStore('resume', () => {
@@ -41,19 +41,24 @@ export const useResumeStore = defineStore('resume', () => {
     }
   }
 
-  async function saveResume() {
+  async function saveResume(type: SnapshotType = 'manual') {
     if (!resumeData.value) return
     saving.value = true
     try {
       const res = await resumeApi.saveResume(resumeData.value)
       if (res.success && res.data) {
         lastSavedAt.value = res.data.savedAt
+        await versionHistoryApi.createSnapshot(resumeData.value, type)
         return true
       }
       return false
     } finally {
       saving.value = false
     }
+  }
+
+  async function autoSave() {
+    return saveResume('auto')
   }
 
   async function resetResume() {
@@ -252,6 +257,7 @@ export const useResumeStore = defineStore('resume', () => {
     sortedModules,
     initResume,
     saveResume,
+    autoSave,
     resetResume,
     switchTemplate,
     updateBasicInfo,
