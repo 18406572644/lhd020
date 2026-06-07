@@ -65,6 +65,7 @@ $spacing-4xl: 48px;
 // 边框
 $border-radius-sm: 2px;
 $border-radius-base: 4px;
+$border-radius-md: 6px;
 $border-radius-lg: 8px;
 $border-radius-xl: 12px;
 
@@ -89,8 +90,10 @@ $color-danger: #f56c6c;
 $color-info: #909399;
 
 // 浅色变体
+$color-primary: $primary-color;
 $color-primary-lighter: #ecf5ff;
 $color-primary-light: #79bbff;
+$color-primary-lightest: #f0f7ff;
 $color-success-lighter: #f0f9eb;
 $color-success-light: #95d475;
 $color-warning-lighter: #fdf6ec;
