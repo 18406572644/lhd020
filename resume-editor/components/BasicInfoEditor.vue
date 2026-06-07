@@ -49,14 +49,12 @@
       </el-form-item>
       
       <el-form-item label="个人简介">
-        <el-input
-          v-model="resumeStore.resumeData.basicInfo.summary"
-          type="textarea"
-          :rows="4"
-          placeholder="简要介绍您的专业背景、核心优势和职业目标"
-          maxlength="500"
-          show-word-limit
-        />
+        <ClientOnly>
+          <RichTextEditor
+            v-model="resumeStore.resumeData.basicInfo.summary"
+            placeholder="简要介绍您的专业背景、核心优势和职业目标"
+          />
+        </ClientOnly>
       </el-form-item>
     </el-form>
     

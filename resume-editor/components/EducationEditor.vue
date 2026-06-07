@@ -41,7 +41,7 @@
               {{ edu.startDate || '开始时间' }} - {{ edu.endDate || '结束时间' }}
             </span>
           </div>
-          <p class="description" v-if="edu.description">{{ edu.description }}</p>
+          <div class="description" v-if="edu.description" v-html="edu.description"></div>
         </div>
       </div>
     </div>
@@ -93,14 +93,12 @@
         </el-form-item>
         
         <el-form-item label="描述">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入教育经历描述，如 GPA、奖项、荣誉等"
-            maxlength="300"
-            show-word-limit
-          />
+          <ClientOnly>
+            <RichTextEditor
+              v-model="form.description"
+              placeholder="请输入教育经历描述，如 GPA、奖项、荣誉等"
+            />
+          </ClientOnly>
         </el-form-item>
       </el-form>
       
@@ -281,6 +279,65 @@ async function handleSave() {
         font-size: $font-size-sm;
         color: $color-gray-600;
         line-height: $line-height-base;
+        
+        :deep(p) {
+          margin-bottom: $spacing-xs;
+        }
+        
+        :deep(ul),
+        :deep(ol) {
+          padding-left: $spacing-lg;
+          margin-bottom: $spacing-xs;
+        }
+        
+        :deep(ul) {
+          list-style: disc;
+        }
+        
+        :deep(ol) {
+          list-style: decimal;
+        }
+        
+        :deep(li) {
+          margin-bottom: 2px;
+        }
+        
+        :deep(a) {
+          color: $accent-color;
+          text-decoration: underline;
+        }
+        
+        :deep(strong) {
+          font-weight: 600;
+        }
+        
+        :deep(em) {
+          font-style: italic;
+        }
+        
+        :deep(u) {
+          text-decoration: underline;
+        }
+        
+        :deep(table) {
+          border-collapse: collapse;
+          width: 100%;
+          margin: $spacing-xs 0;
+          
+          td,
+          th {
+            border: 1px solid $color-gray-300;
+            padding: $spacing-xs $spacing-sm;
+            min-width: 60px;
+            text-align: left;
+            font-size: $font-size-xs;
+          }
+          
+          th {
+            background-color: $color-gray-100;
+            font-weight: 600;
+          }
+        }
       }
     }
   }

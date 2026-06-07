@@ -41,7 +41,7 @@
               {{ project.startDate || '开始时间' }} - {{ project.endDate || '结束时间' }}
             </span>
           </div>
-          <p class="description" v-if="project.description">{{ project.description }}</p>
+          <div class="description" v-if="project.description" v-html="project.description"></div>
           <div class="technologies" v-if="project.technologies?.length">
             <el-tag
               v-for="(tech, i) in project.technologies"
@@ -54,7 +54,7 @@
             </el-tag>
           </div>
           <ul class="highlights" v-if="project.highlights?.length">
-            <li v-for="(item, i) in project.highlights" :key="i">{{ item }}</li>
+            <li v-for="(item, i) in project.highlights" :key="i" v-html="item"></li>
           </ul>
         </div>
       </div>
@@ -96,12 +96,12 @@
         </el-form-item>
         
         <el-form-item label="项目描述">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入项目描述"
-          />
+          <ClientOnly>
+            <RichTextEditor
+              v-model="form.description"
+              placeholder="请输入项目描述"
+            />
+          </ClientOnly>
         </el-form-item>
         
         <el-form-item label="技术栈">
@@ -117,12 +117,20 @@
         </el-form-item>
         
         <el-form-item label="项目亮点">
-          <div class="highlights-editor">
+          <div class="highlights-tip">
+            <el-icon><Rank /></el-icon>
+            <span>拖拽左侧图标调整亮点顺序</span>
+          </div>
+          <div class="highlights-editor" ref="highlightsContainerRef">
             <div
               v-for="(highlight, index) in form.highlights"
               :key="index"
               class="highlight-item"
+              :data-index="index"
             >
+              <div class="drag-handle">
+                <el-icon><Rank /></el-icon>
+              </div>
               <el-input v-model="form.highlights[index]" placeholder="请输入项目亮点" />
               <el-button 
                 size="small" 
@@ -150,15 +158,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch, nextTick, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import Sortable from 'sortablejs'
 import type { Project } from '@/types/resume'
+import { Rank } from '@element-plus/icons-vue'
 
 const resumeStore = useResumeStore()
 const dialogVisible = ref(false)
 const editingIndex = ref(-1)
 const saving = ref(false)
 const formRef = ref<FormInstance>()
+const highlightsContainerRef = ref<HTMLElement | null>(null)
+let sortableInstance: Sortable | null = null
 
 const form = reactive<Omit<Project, 'id'>>({
   name: '',
@@ -168,6 +180,54 @@ const form = reactive<Omit<Project, 'id'>>({
   description: '',
   technologies: [],
   highlights: []
+})
+
+function initSortable() {
+  if (!highlightsContainerRef.value) return
+  
+  if (sortableInstance) {
+    sortableInstance.destroy()
+  }
+  
+  nextTick(() => {
+    if (!highlightsContainerRef.value) return
+    
+    sortableInstance = Sortable.create(highlightsContainerRef.value, {
+      animation: 150,
+      handle: '.drag-handle',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      onEnd: (evt) => {
+        const oldIndex = evt.oldIndex
+        const newIndex = evt.newIndex
+        if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) return
+        
+        const item = form.highlights.splice(oldIndex, 1)[0]
+        form.highlights.splice(newIndex, 0, item)
+      }
+    })
+  })
+}
+
+watch(dialogVisible, (visible) => {
+  if (visible) {
+    nextTick(() => {
+      initSortable()
+    })
+  } else {
+    if (sortableInstance) {
+      sortableInstance.destroy()
+      sortableInstance = null
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  if (sortableInstance) {
+    sortableInstance.destroy()
+    sortableInstance = null
+  }
 })
 
 function resetForm() {
@@ -324,6 +384,65 @@ async function handleSave() {
         color: $color-gray-600;
         line-height: $line-height-base;
         margin-bottom: $spacing-sm;
+        
+        :deep(p) {
+          margin-bottom: $spacing-xs;
+        }
+        
+        :deep(ul),
+        :deep(ol) {
+          padding-left: $spacing-lg;
+          margin-bottom: $spacing-xs;
+        }
+        
+        :deep(ul) {
+          list-style: disc;
+        }
+        
+        :deep(ol) {
+          list-style: decimal;
+        }
+        
+        :deep(li) {
+          margin-bottom: 2px;
+        }
+        
+        :deep(a) {
+          color: $accent-color;
+          text-decoration: underline;
+        }
+        
+        :deep(strong) {
+          font-weight: 600;
+        }
+        
+        :deep(em) {
+          font-style: italic;
+        }
+        
+        :deep(u) {
+          text-decoration: underline;
+        }
+        
+        :deep(table) {
+          border-collapse: collapse;
+          width: 100%;
+          margin: $spacing-xs 0;
+          
+          td,
+          th {
+            border: 1px solid $color-gray-300;
+            padding: $spacing-xs $spacing-sm;
+            min-width: 60px;
+            text-align: left;
+            font-size: $font-size-xs;
+          }
+          
+          th {
+            background-color: $color-gray-100;
+            font-weight: 600;
+          }
+        }
       }
       
       .technologies {
@@ -342,8 +461,38 @@ async function handleSave() {
           color: $color-gray-600;
           line-height: $line-height-base;
           margin-bottom: $spacing-xs;
+          
+          :deep(a) {
+            color: $accent-color;
+            text-decoration: underline;
+          }
+          
+          :deep(strong) {
+            font-weight: 600;
+          }
+          
+          :deep(em) {
+            font-style: italic;
+          }
+          
+          :deep(u) {
+            text-decoration: underline;
+          }
         }
       }
+    }
+  }
+  
+  .highlights-tip {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+    color: $color-gray-500;
+    margin-bottom: $spacing-sm;
+    
+    .el-icon {
+      font-size: $font-size-sm;
     }
   }
   
@@ -356,6 +505,58 @@ async function handleSave() {
       display: flex;
       gap: $spacing-sm;
       align-items: flex-start;
+      padding: $spacing-xs;
+      border: 1px solid transparent;
+      border-radius: $border-radius-base;
+      transition: $transition-base;
+      
+      &:hover {
+        border-color: $color-gray-200;
+        background-color: $color-gray-50;
+      }
+      
+      .drag-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 32px;
+        cursor: grab;
+        color: $color-gray-400;
+        transition: $transition-base;
+        flex-shrink: 0;
+        
+        &:hover {
+          color: $accent-color;
+        }
+        
+        &:active {
+          cursor: grabbing;
+        }
+        
+        .el-icon {
+          font-size: 16px;
+        }
+      }
+      
+      .el-input {
+        flex: 1;
+      }
+      
+      &.sortable-chosen {
+        opacity: 0.8;
+      }
+      
+      &.sortable-ghost {
+        opacity: 0.4;
+        background-color: $color-gray-100;
+      }
+      
+      &.sortable-drag {
+        opacity: 1;
+        background-color: $color-white;
+        box-shadow: $shadow-lg;
+      }
     }
   }
 }

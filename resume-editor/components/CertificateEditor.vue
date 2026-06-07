@@ -39,7 +39,7 @@
             </el-button>
           </div>
         </div>
-        <p class="description" v-if="cert.description">{{ cert.description }}</p>
+        <div class="description" v-if="cert.description" v-html="cert.description"></div>
       </div>
     </div>
     
@@ -69,14 +69,12 @@
         </el-form-item>
         
         <el-form-item label="描述">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入证书描述"
-            maxlength="200"
-            show-word-limit
-          />
+          <ClientOnly>
+            <RichTextEditor
+              v-model="form.description"
+              placeholder="请输入证书描述"
+            />
+          </ClientOnly>
         </el-form-item>
       </el-form>
       
@@ -258,6 +256,65 @@ async function handleSave() {
       color: $color-gray-600;
       line-height: $line-height-base;
       padding-left: 64px;
+      
+      :deep(p) {
+        margin-bottom: $spacing-xs;
+      }
+      
+      :deep(ul),
+      :deep(ol) {
+        padding-left: $spacing-lg;
+        margin-bottom: $spacing-xs;
+      }
+      
+      :deep(ul) {
+        list-style: disc;
+      }
+      
+      :deep(ol) {
+        list-style: decimal;
+      }
+      
+      :deep(li) {
+        margin-bottom: 2px;
+      }
+      
+      :deep(a) {
+        color: $accent-color;
+        text-decoration: underline;
+      }
+      
+      :deep(strong) {
+        font-weight: 600;
+      }
+      
+      :deep(em) {
+        font-style: italic;
+      }
+      
+      :deep(u) {
+        text-decoration: underline;
+      }
+      
+      :deep(table) {
+        border-collapse: collapse;
+        width: 100%;
+        margin: $spacing-xs 0;
+        
+        td,
+        th {
+          border: 1px solid $color-gray-300;
+          padding: $spacing-xs $spacing-sm;
+          min-width: 60px;
+          text-align: left;
+          font-size: $font-size-xs;
+        }
+        
+        th {
+          background-color: $color-gray-100;
+          font-weight: 600;
+        }
+      }
     }
   }
 }

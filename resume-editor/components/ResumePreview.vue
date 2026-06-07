@@ -58,9 +58,7 @@
                 </div>
               </div>
             </div>
-            <div class="summary" v-if="resumeStore.resumeData.basicInfo.summary">
-              {{ resumeStore.resumeData.basicInfo.summary }}
-            </div>
+            <div class="summary" v-if="resumeStore.resumeData.basicInfo.summary" v-html="resumeStore.resumeData.basicInfo.summary"></div>
           </header>
           
           <!-- 内容区域 -->
@@ -81,9 +79,9 @@
                           {{ work.startDate }} - {{ work.current ? '至今' : work.endDate }}
                         </div>
                       </div>
-                      <p class="description" v-if="work.description">{{ work.description }}</p>
+                      <div class="description" v-if="work.description" v-html="work.description"></div>
                       <ul class="highlights" v-if="work.highlights?.length">
-                        <li v-for="(highlight, i) in work.highlights" :key="i">{{ highlight }}</li>
+                        <li v-for="(highlight, i) in work.highlights" :key="i" v-html="highlight"></li>
                       </ul>
                     </div>
                   </div>
@@ -103,12 +101,12 @@
                           {{ project.startDate }} - {{ project.endDate }}
                         </div>
                       </div>
-                      <p class="description" v-if="project.description">{{ project.description }}</p>
+                      <div class="description" v-if="project.description" v-html="project.description"></div>
                       <div class="technologies" v-if="project.technologies?.length">
                         <span v-for="(tech, i) in project.technologies" :key="i" class="tech-tag">{{ tech }}</span>
                       </div>
                       <ul class="highlights" v-if="project.highlights?.length">
-                        <li v-for="(highlight, i) in project.highlights" :key="i">{{ highlight }}</li>
+                        <li v-for="(highlight, i) in project.highlights" :key="i" v-html="highlight"></li>
                       </ul>
                     </div>
                   </div>
@@ -128,7 +126,7 @@
                           {{ edu.startDate }} - {{ edu.endDate }}
                         </div>
                       </div>
-                      <p class="description" v-if="edu.description">{{ edu.description }}</p>
+                      <div class="description" v-if="edu.description" v-html="edu.description"></div>
                     </div>
                   </div>
                 </section>
@@ -160,7 +158,7 @@
                     <div v-for="cert in resumeStore.resumeData!.certificates" :key="cert.id" class="certificate-item">
                       <div class="cert-name">{{ cert.name }}</div>
                       <div class="cert-issuer">{{ cert.issuer }} · {{ cert.date }}</div>
-                      <p class="description" v-if="cert.description">{{ cert.description }}</p>
+                      <div class="description" v-if="cert.description" v-html="cert.description"></div>
                     </div>
                   </div>
                 </section>
@@ -495,6 +493,65 @@ const visibleSideModules = computed(() => {
       font-size: 12px;
       line-height: 1.8;
       opacity: 0.95;
+      
+      :deep(p) {
+        margin-bottom: 2mm;
+      }
+      
+      :deep(ul),
+      :deep(ol) {
+        padding-left: 4mm;
+        margin-bottom: 2mm;
+      }
+      
+      :deep(ul) {
+        list-style: disc;
+      }
+      
+      :deep(ol) {
+        list-style: decimal;
+      }
+      
+      :deep(li) {
+        margin-bottom: 0.5mm;
+      }
+      
+      :deep(a) {
+        color: inherit;
+        text-decoration: underline;
+      }
+      
+      :deep(strong) {
+        font-weight: 600;
+      }
+      
+      :deep(em) {
+        font-style: italic;
+      }
+      
+      :deep(u) {
+        text-decoration: underline;
+      }
+      
+      :deep(table) {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 2mm 0;
+        
+        td,
+        th {
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          padding: 1mm 2mm;
+          min-width: 15mm;
+          text-align: left;
+          font-size: 10.5px;
+        }
+        
+        th {
+          background-color: rgba(255, 255, 255, 0.1);
+          font-weight: 600;
+        }
+      }
     }
   }
   
@@ -556,23 +613,99 @@ const visibleSideModules = computed(() => {
     }
     
     .description {
-      font-size: 11.5px;
-      color: $color-gray-700;
-      line-height: 1.7;
-      margin-bottom: 2mm;
-    }
-    
-    .highlights {
-      list-style: disc;
-      padding-left: 4mm;
-      
-      li {
         font-size: 11.5px;
         color: $color-gray-700;
         line-height: 1.7;
-        margin-bottom: 1mm;
+        margin-bottom: 2mm;
+        
+        :deep(p) {
+          margin-bottom: 2mm;
+        }
+        
+        :deep(ul),
+        :deep(ol) {
+          padding-left: 4mm;
+          margin-bottom: 2mm;
+        }
+        
+        :deep(ul) {
+          list-style: disc;
+        }
+        
+        :deep(ol) {
+          list-style: decimal;
+        }
+        
+        :deep(li) {
+          margin-bottom: 0.5mm;
+        }
+        
+        :deep(a) {
+          color: $accent-color;
+          text-decoration: underline;
+        }
+        
+        :deep(strong) {
+          font-weight: 600;
+        }
+        
+        :deep(em) {
+          font-style: italic;
+        }
+        
+        :deep(u) {
+          text-decoration: underline;
+        }
+        
+        :deep(table) {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 2mm 0;
+          
+          td,
+          th {
+            border: 1px solid $color-gray-300;
+            padding: 1mm 2mm;
+            min-width: 15mm;
+            text-align: left;
+            font-size: 10.5px;
+          }
+          
+          th {
+            background-color: $color-gray-100;
+            font-weight: 600;
+          }
+        }
       }
-    }
+    
+    .highlights {
+        list-style: disc;
+        padding-left: 4mm;
+        
+        li {
+          font-size: 11.5px;
+          color: $color-gray-700;
+          line-height: 1.7;
+          margin-bottom: 1mm;
+          
+          :deep(a) {
+            color: $accent-color;
+            text-decoration: underline;
+          }
+          
+          :deep(strong) {
+            font-weight: 600;
+          }
+          
+          :deep(em) {
+            font-style: italic;
+          }
+          
+          :deep(u) {
+            text-decoration: underline;
+          }
+        }
+      }
     
     .technologies {
       display: flex;

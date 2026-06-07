@@ -35,7 +35,7 @@
               <el-switch
                 :model-value="module.visible"
                 size="small"
-                @change="(val: boolean) => handleVisibilityChange(module.id, val)"
+                @change="(val: string | number | boolean) => handleVisibilityChange(module.id, val as boolean)"
               />
             </div>
           </div>
