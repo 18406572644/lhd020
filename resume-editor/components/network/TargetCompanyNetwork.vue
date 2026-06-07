@@ -225,6 +225,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
 import { OfficeBuilding, Search, ArrowRight, View, Promotion } from '@element-plus/icons-vue'
 import { targetCompanyOptions } from '@/data/networkData'
 import type { Person } from '@/types/network'

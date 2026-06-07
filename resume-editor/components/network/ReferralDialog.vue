@@ -100,6 +100,7 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
 import { View, Promotion } from '@element-plus/icons-vue'
 import { targetCompanyOptions } from '@/data/networkData'
 import type { Person } from '@/types/network'
