@@ -22,6 +22,14 @@
           <el-icon><TrendCharts /></el-icon>
           <span>薪资预估</span>
         </router-link>
+        <router-link 
+          to="/network" 
+          class="nav-link" 
+          :class="{ active: $route.path === '/network' }"
+        >
+          <el-icon><Connection /></el-icon>
+          <span>人脉网络</span>
+        </router-link>
       </nav>
     </div>
     
@@ -137,7 +145,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { TrendCharts, Edit, Clock } from '@element-plus/icons-vue'
+import { TrendCharts, Edit, Clock, Connection } from '@element-plus/icons-vue'
 
 const resumeStore = useResumeStore()
 const versionHistoryStore = useVersionHistoryStore()
