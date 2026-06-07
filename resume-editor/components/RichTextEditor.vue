@@ -3,25 +3,28 @@
     <div class="editor-toolbar">
       <div class="toolbar-group">
         <button
+          type="button"
           class="toolbar-btn toolbar-btn-text"
-          :class="{ 'is-active': editor?.isActive('bold') }"
-          @click="editor?.chain().focus().toggleBold().run()"
+          :class="{ 'is-active': isActive('bold') }"
+          @click.prevent="handleToggleBold"
           title="加粗 (Ctrl+B)"
         >
           <strong>B</strong>
         </button>
         <button
+          type="button"
           class="toolbar-btn toolbar-btn-text"
-          :class="{ 'is-active': editor?.isActive('italic') }"
-          @click="editor?.chain().focus().toggleItalic().run()"
+          :class="{ 'is-active': isActive('italic') }"
+          @click.prevent="handleToggleItalic"
           title="斜体 (Ctrl+I)"
         >
           <em>I</em>
         </button>
         <button
+          type="button"
           class="toolbar-btn toolbar-btn-text"
-          :class="{ 'is-active': editor?.isActive('underline') }"
-          @click="editor?.chain().focus().toggleUnderline().run()"
+          :class="{ 'is-active': isActive('underline') }"
+          @click.prevent="handleToggleUnderline"
           title="下划线 (Ctrl+U)"
         >
           <span style="text-decoration: underline;">U</span>
@@ -32,17 +35,19 @@
       
       <div class="toolbar-group">
         <button
+          type="button"
           class="toolbar-btn"
-          :class="{ 'is-active': editor?.isActive('bulletList') }"
-          @click="editor?.chain().focus().toggleBulletList().run()"
+          :class="{ 'is-active': isActive('bulletList') }"
+          @click.prevent="handleToggleBulletList"
           title="无序列表"
         >
           <el-icon><List /></el-icon>
         </button>
         <button
+          type="button"
           class="toolbar-btn toolbar-btn-text"
-          :class="{ 'is-active': editor?.isActive('orderedList') }"
-          @click="editor?.chain().focus().toggleOrderedList().run()"
+          :class="{ 'is-active': isActive('orderedList') }"
+          @click.prevent="handleToggleOrderedList"
           title="有序列表"
         >
           <span>1.</span>
@@ -53,16 +58,18 @@
       
       <div class="toolbar-group">
         <button
+          type="button"
           class="toolbar-btn"
-          :class="{ 'is-active': editor?.isActive('link') }"
-          @click="showLinkDialog"
+          :class="{ 'is-active': isActive('link') }"
+          @click.prevent="showLinkDialog"
           title="插入链接"
         >
           <el-icon><Link /></el-icon>
         </button>
         <button
+          type="button"
           class="toolbar-btn"
-          @click="showTableDialog"
+          @click.prevent="showTableDialog"
           title="插入表格"
         >
           <el-icon><Grid /></el-icon>
@@ -78,7 +85,7 @@
       width="400px"
       :close-on-click-modal="false"
     >
-      <el-form :model="linkForm" label-width="80px">
+      <el-form :model="linkForm" label-width="80px" @submit.prevent>
         <el-form-item label="链接文本">
           <el-input v-model="linkForm.text" placeholder="请输入链接显示文本" />
         </el-form-item>
@@ -98,7 +105,7 @@
       width="400px"
       :close-on-click-modal="false"
     >
-      <el-form :model="tableForm" label-width="80px">
+      <el-form :model="tableForm" label-width="80px" @submit.prevent>
         <el-form-item label="行数">
           <el-input-number v-model="tableForm.rows" :min="1" :max="20" />
         </el-form-item>
@@ -159,7 +166,7 @@ const editor = useEditor({
     TableCell,
     TableHeader,
     Placeholder.configure({
-      placeholder: props.placeholder || '请输入内容...'
+      placeholder: () => props.placeholder || '请输入内容...'
     })
   ],
   editorProps: {
@@ -182,8 +189,58 @@ const editor = useEditor({
   }
 })
 
+function getEditor(): Editor | undefined {
+  return editor.value as Editor | undefined
+}
+
+function isActive(name: string, attrs?: Record<string, any>): boolean {
+  const ed = getEditor()
+  if (!ed) return false
+  return ed.isActive(name, attrs)
+}
+
+function handleToggleBold(event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  const ed = getEditor()
+  if (!ed) return
+  ed.chain().focus().toggleBold().run()
+}
+
+function handleToggleItalic(event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  const ed = getEditor()
+  if (!ed) return
+  ed.chain().focus().toggleItalic().run()
+}
+
+function handleToggleUnderline(event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  const ed = getEditor()
+  if (!ed) return
+  ed.chain().focus().toggleUnderline().run()
+}
+
+function handleToggleBulletList(event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  const ed = getEditor()
+  if (!ed) return
+  ed.chain().focus().toggleBulletList().run()
+}
+
+function handleToggleOrderedList(event: Event) {
+  event.preventDefault()
+  event.stopPropagation()
+  const ed = getEditor()
+  if (!ed) return
+  ed.chain().focus().toggleOrderedList().run()
+}
+
 watch(() => props.modelValue, (newValue) => {
-  const ed = editor.value as Editor | undefined
+  const ed = getEditor()
   if (ed && ed.getHTML() !== newValue) {
     ed.commands.setContent(newValue, { emitUpdate: false })
   }
@@ -202,8 +259,11 @@ const tableForm = reactive({
   withHeader: true
 })
 
-function showLinkDialog() {
-  const ed = editor.value as Editor | undefined
+function showLinkDialog(event?: Event) {
+  event?.preventDefault()
+  event?.stopPropagation()
+  
+  const ed = getEditor()
   if (!ed) return
   
   const selection = ed.state.selection
@@ -213,8 +273,11 @@ function showLinkDialog() {
   linkDialogVisible.value = true
 }
 
-function insertLink() {
-  const ed = editor.value as Editor | undefined
+function insertLink(event?: Event) {
+  event?.preventDefault()
+  event?.stopPropagation()
+  
+  const ed = getEditor()
   if (!ed) return
   
   if (linkForm.href) {
@@ -227,15 +290,21 @@ function insertLink() {
   linkDialogVisible.value = false
 }
 
-function showTableDialog() {
+function showTableDialog(event?: Event) {
+  event?.preventDefault()
+  event?.stopPropagation()
+  
   tableForm.rows = 3
   tableForm.cols = 3
   tableForm.withHeader = true
   tableDialogVisible.value = true
 }
 
-function insertTable() {
-  const ed = editor.value as Editor | undefined
+function insertTable(event?: Event) {
+  event?.preventDefault()
+  event?.stopPropagation()
+  
+  const ed = getEditor()
   if (!ed) return
   
   ed.chain().focus().insertTable({
@@ -248,7 +317,7 @@ function insertTable() {
 }
 
 onBeforeUnmount(() => {
-  const ed = editor.value as Editor | undefined
+  const ed = getEditor()
   ed?.destroy()
 })
 </script>

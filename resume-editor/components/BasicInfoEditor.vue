@@ -1,6 +1,6 @@
 <template>
   <div class="basic-info-editor">
-    <el-form v-if="resumeStore.resumeData" :model="resumeStore.resumeData.basicInfo" label-width="100px">
+    <el-form v-if="resumeStore.resumeData" :model="resumeStore.resumeData.basicInfo" label-width="100px" @submit.prevent>
       <div class="avatar-section">
         <div class="avatar-wrapper">
           <el-avatar

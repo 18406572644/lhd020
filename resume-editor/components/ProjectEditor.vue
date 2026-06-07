@@ -66,7 +66,7 @@
       width="600px"
       :close-on-click-modal="false"
     >
-      <el-form :model="form" label-width="100px" ref="formRef">
+      <el-form :model="form" label-width="100px" ref="formRef" @submit.prevent>
         <el-form-item label="项目名称" prop="name" :rules="[{ required: true, message: '请输入项目名称', trigger: 'blur' }]">
           <el-input v-model="form.name" placeholder="请输入项目名称" />
         </el-form-item>
@@ -133,15 +133,16 @@
               </div>
               <el-input v-model="form.highlights[index]" placeholder="请输入项目亮点" />
               <el-button 
+                native-type="button"
                 size="small" 
                 type="danger" 
                 text
-                @click="form.highlights.splice(index, 1)"
+                @click.prevent="form.highlights.splice(index, 1)"
               >
                 <el-icon><Close /></el-icon>
               </el-button>
             </div>
-            <el-button size="small" @click="form.highlights.push('')">
+            <el-button native-type="button" size="small" @click.prevent="form.highlights.push('')">
               <el-icon><Plus /></el-icon>
               添加亮点
             </el-button>
@@ -150,8 +151,8 @@
       </el-form>
       
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+        <el-button native-type="button" @click="dialogVisible = false">取消</el-button>
+        <el-button native-type="button" type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
   </div>

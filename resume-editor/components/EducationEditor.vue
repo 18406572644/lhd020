@@ -52,7 +52,7 @@
       width="560px"
       :close-on-click-modal="false"
     >
-      <el-form :model="form" label-width="100px" ref="formRef">
+      <el-form :model="form" label-width="100px" ref="formRef" @submit.prevent>
         <el-form-item label="学校名称" prop="school" :rules="[{ required: true, message: '请输入学校名称', trigger: 'blur' }]">
           <el-input v-model="form.school" placeholder="请输入学校名称" />
         </el-form-item>
@@ -103,8 +103,8 @@
       </el-form>
       
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+        <el-button native-type="button" @click="dialogVisible = false">取消</el-button>
+        <el-button native-type="button" type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
   </div>
