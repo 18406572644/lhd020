@@ -9,7 +9,10 @@
     </div>
 
     <div v-if="loading" class="loading-container">
-      <el-loading v-loading="true" text="正在分析您的简历数据..." />
+      <div class="loading-content">
+        <el-icon class="loading-icon"><Loading /></el-icon>
+        <p class="loading-text">正在分析您的简历数据...</p>
+      </div>
     </div>
 
     <div v-else-if="result" class="estimator-content">
@@ -85,7 +88,7 @@
               <div class="distribution-bar-container">
                 <div 
                   class="distribution-bar" 
-                  :style="{ height: item.percentage + '%' }"
+                  :style="{ height: getBarHeight(item.percentage) }"
                   :class="{ 'active': isInCurrentRange(item, result.salaryRange.median) }"
                 ></div>
               </div>
@@ -225,6 +228,11 @@
         </div>
         
         <div class="suggestions-list">
+          <div v-if="filteredSuggestions.length === 0" class="empty-suggestions">
+            <el-empty :description="`暂无${getTabLabel(activeSuggestionTab)}相关的提升建议`" :image-size="80">
+              <el-button type="primary" size="small" @click="activeSuggestionTab = 'all'">查看全部建议</el-button>
+            </el-empty>
+          </div>
           <div 
             v-for="(suggestion, index) in filteredSuggestions" 
             :key="index" 
@@ -302,11 +310,13 @@ import {
   FolderOpened,
   Medal,
   Star,
-  Guide
+  Guide,
+  Loading
 } from '@element-plus/icons-vue'
 import { useResumeStore } from '@/stores/resume'
 import { salaryApi } from '@/services/salaryApi'
 import type { SalaryEstimateResult, ImprovementSuggestion } from '@/types/salary'
+import { defaultResumeData } from '@/data/mockData'
 
 const resumeStore = useResumeStore()
 
@@ -382,6 +392,13 @@ const trendYLabels = computed(() => {
   return Array.from({ length: 5 }, (_, i) => Math.round(maxSalary - i * step))
 })
 
+function getBarHeight(percentage: number): string {
+  const maxHeight = 160
+  const minHeight = 10
+  const height = Math.max(minHeight, (percentage / 100) * maxHeight)
+  return `${height}px`
+}
+
 function isInCurrentRange(item: { range: string }, median: number): boolean {
   const match = item.range.match(/(\d+)-(\d+)/)
   if (match) {
@@ -420,6 +437,17 @@ function getProgressColor(percentage: number): string {
   if (percentage >= 70) return '#67C23A'
   if (percentage >= 50) return '#E6A23C'
   return '#F56C6C'
+}
+
+function getTabLabel(tab: string): string {
+  const labels: Record<string, string> = {
+    all: '全部',
+    skill: '技能',
+    certification: '认证',
+    education: '学历',
+    experience: '经验'
+  }
+  return labels[tab] || ''
 }
 
 function getSuggestionIcon(type: string): any {
@@ -480,13 +508,10 @@ function formatDate(dateStr: string): string {
 }
 
 async function estimateSalary() {
-  if (!resumeStore.resumeData) {
-    error.value = true
-    return
-  }
+  const data = defaultResumeData
 
   try {
-    const res = await salaryApi.estimateSalary(resumeStore.resumeData)
+    const res = await salaryApi.estimateSalary(data)
     if (res.success && res.data) {
       result.value = res.data
       error.value = false
@@ -555,6 +580,34 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $spacing-lg;
+      color: $color-gray-600;
+
+      .loading-icon {
+        font-size: 48px;
+        color: $primary-color;
+        animation: rotate 1.2s linear infinite;
+      }
+
+      .loading-text {
+        font-size: $font-size-base;
+        margin: 0;
+      }
+    }
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .error-container {
@@ -971,6 +1024,10 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: $spacing-md;
+
+    .empty-suggestions {
+      padding: $spacing-2xl 0;
+    }
 
     .suggestion-item {
       display: flex;

@@ -40,7 +40,16 @@ function estimateSalary(resumeData: ResumeData): SalaryEstimateResult {
 
   const highestDegree = education.length > 0 
     ? education.sort((a, b) => {
-        const order: Record<string, number> = { '博士': 4, '硕士': 3, '本科': 2, '大专': 1 }
+        const order: Record<string, number> = { 
+          '博士': 6, 
+          '硕士': 5, 
+          '本科': 4, 
+          '大专': 3, 
+          '高中': 2,
+          '中专': 2,
+          '职高': 2,
+          '高中及以下': 1 
+        }
         return (order[b.degree] || 0) - (order[a.degree] || 0)
       })[0].degree
     : '本科'

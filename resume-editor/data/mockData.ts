@@ -58,21 +58,12 @@ export const defaultModules: ResumeModule[] = [
 export const defaultEducation: Education[] = [
   {
     id: 'edu1',
-    school: '北京大学',
-    degree: '硕士',
-    major: '计算机科学与技术',
-    startDate: '2018-09',
-    endDate: '2021-06',
-    description: 'GPA: 3.8/4.0，获得国家奖学金，优秀毕业生'
-  },
-  {
-    id: 'edu2',
-    school: '清华大学',
-    degree: '学士',
-    major: '软件工程',
-    startDate: '2014-09',
+    school: '北京市第一中学',
+    degree: '高中',
+    major: '',
+    startDate: '2015-09',
     endDate: '2018-06',
-    description: '专业排名前 10%，多次获得学业奖学金'
+    description: ''
   }
 ]
 
@@ -143,11 +134,7 @@ export const defaultProjects: Project[] = [
 // 默认技能
 export const defaultSkills: Skill[] = [
   { id: 'skill1', name: 'Vue.js', level: 95, category: '前端框架' },
-  { id: 'skill2', name: 'React', level: 90, category: '前端框架' },
-  { id: 'skill3', name: 'TypeScript', level: 92, category: '编程语言' },
-  { id: 'skill4', name: 'Node.js', level: 85, category: '后端开发' },
-  { id: 'skill5', name: 'Webpack', level: 88, category: '工程化' },
-  { id: 'skill6', name: 'Git', level: 90, category: '工具' }
+  { id: 'skill2', name: 'React', level: 90, category: '前端框架' }
 ]
 
 // 默认证书

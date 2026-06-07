@@ -45,6 +45,9 @@ export const degreeCoefficients: Record<string, number> = {
   '硕士': 1.2,
   '本科': 1.0,
   '大专': 0.85,
+  '高中': 0.7,
+  '中专': 0.7,
+  '职高': 0.7,
   '高中及以下': 0.7
 }
 
@@ -209,10 +212,11 @@ export function generateImprovementSuggestions(
   const highDemandSkills = skillMarketValues.filter(v => v.demand === 'high')
   const userSkills = skills.map(s => s.name.toLowerCase())
   
+  const skillSuggestions: ImprovementSuggestion[] = []
   highDemandSkills.forEach(marketSkill => {
     const userSkill = skills.find(s => s.name.toLowerCase() === marketSkill.skill.toLowerCase())
     if (userSkill && userSkill.level < 80) {
-      suggestions.push({
+      skillSuggestions.push({
         type: 'skill',
         title: `提升 ${marketSkill.skill} 技能`,
         description: `${marketSkill.skill} 目前市场需求旺盛，将技能等级从 ${userSkill.level} 提升到 80+`,
@@ -221,7 +225,7 @@ export function generateImprovementSuggestions(
         priority: 'high'
       })
     } else if (!userSkills.includes(marketSkill.skill.toLowerCase())) {
-      suggestions.push({
+      skillSuggestions.push({
         type: 'skill',
         title: `学习 ${marketSkill.skill}`,
         description: `${marketSkill.skill} 是当前高需求技能（${marketSkill.category}），掌握后可显著提升竞争力`,
@@ -232,7 +236,27 @@ export function generateImprovementSuggestions(
     }
   })
   
-  if (degree === '本科') {
+  suggestions.push(...skillSuggestions.slice(0, 4))
+  
+  if (degree === '博士') {
+    suggestions.push({
+      type: 'education',
+      title: '博士后研究/行业深耕',
+      description: '博士学历已处于学历金字塔顶端，建议深耕专业领域或参与博士后研究提升学术影响力',
+      salaryIncrease: 10,
+      difficulty: 'hard',
+      priority: 'low'
+    })
+  } else if (degree === '硕士') {
+    suggestions.push({
+      type: 'education',
+      title: '攻读博士学位',
+      description: '博士学历平均薪资比硕士高 17%，适合有意向从事研究或高端技术岗位的人士',
+      salaryIncrease: 18,
+      difficulty: 'hard',
+      priority: 'low'
+    })
+  } else if (degree === '本科') {
     suggestions.push({
       type: 'education',
       title: '攻读硕士学位',
@@ -245,8 +269,34 @@ export function generateImprovementSuggestions(
     suggestions.push({
       type: 'education',
       title: '提升至本科学历',
-      description: '本科学历平均薪资比大专高 17%，可通过自考、成考等方式提升',
+      description: '本科学历平均薪资比大专高 17%，可通过自考、成考、网络教育等方式提升',
       salaryIncrease: 12,
+      difficulty: 'medium',
+      priority: 'high'
+    })
+  } else if (degree === '高中' || degree === '高中及以下' || degree === '中专' || degree === '职高') {
+    suggestions.push({
+      type: 'education',
+      title: '提升至大专学历',
+      description: '大专学历平均薪资比高中高 21%，可通过成人高考、自考、网络教育等方式提升',
+      salaryIncrease: 10,
+      difficulty: 'medium',
+      priority: 'high'
+    })
+    suggestions.push({
+      type: 'education',
+      title: '考取职业资格证书',
+      description: '对于高中及以下学历，职业资格证书可有效提升竞争力，如计算机等级考试、各类行业认证',
+      salaryIncrease: 5,
+      difficulty: 'easy',
+      priority: 'high'
+    })
+  } else {
+    suggestions.push({
+      type: 'education',
+      title: '提升学历层次',
+      description: '建议通过成人教育、自考等方式提升学历，学历是薪资水平的重要影响因素',
+      salaryIncrease: 8,
       difficulty: 'medium',
       priority: 'medium'
     })
@@ -286,5 +336,5 @@ export function generateImprovementSuggestions(
       const priorityOrder = { high: 0, medium: 1, low: 2 }
       return priorityOrder[a.priority] - priorityOrder[b.priority] || b.salaryIncrease - a.salaryIncrease
     })
-    .slice(0, 6)
+    .slice(0, 10)
 }
