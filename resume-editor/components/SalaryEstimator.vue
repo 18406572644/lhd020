@@ -460,8 +460,8 @@ function getSuggestionIcon(type: string): any {
   return icons[type] || Star
 }
 
-function getDifficultyType(difficulty: string): string {
-  const types: Record<string, string> = {
+function getDifficultyType(difficulty: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
+  const types: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     easy: 'success',
     medium: 'warning',
     hard: 'danger'
@@ -478,8 +478,8 @@ function getDifficultyLabel(difficulty: string): string {
   return labels[difficulty] || difficulty
 }
 
-function getPriorityType(priority: string): string {
-  const types: Record<string, string> = {
+function getPriorityType(priority: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
+  const types: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     high: 'danger',
     medium: 'warning',
     low: 'info'

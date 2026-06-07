@@ -338,7 +338,8 @@ function generateSummary(diffs: FieldDiff[], type: SnapshotType): string {
     'skills': '技能',
     'certificates': '证书',
     'modules': '模块设置',
-    'template': '模板'
+    'template': '模板',
+    'charts': '数据可视化图表'
   }
 
   const changedFields = new Set<string>()

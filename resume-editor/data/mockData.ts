@@ -1,4 +1,4 @@
-import type { ResumeData, TemplateConfig, Education, WorkExperience, Project, Skill, Certificate, ResumeModule } from '@/types/resume'
+import type { ResumeData, TemplateConfig, Education, WorkExperience, Project, Skill, Certificate, ResumeModule, Chart, ChartTemplate } from '@/types/resume'
 
 // 模板配置
 export const templateConfigs: TemplateConfig[] = [
@@ -131,11 +131,24 @@ export const defaultProjects: Project[] = [
   }
 ]
 
-// 默认技能
-export const defaultSkills: Skill[] = [
+// 默认技能数据扩展（用于图表展示）
+export const defaultSkillsExtended: Skill[] = [
   { id: 'skill1', name: 'Vue.js', level: 95, category: '前端框架' },
-  { id: 'skill2', name: 'React', level: 90, category: '前端框架' }
+  { id: 'skill2', name: 'React', level: 90, category: '前端框架' },
+  { id: 'skill3', name: 'TypeScript', level: 92, category: '编程语言' },
+  { id: 'skill4', name: 'JavaScript', level: 95, category: '编程语言' },
+  { id: 'skill5', name: 'Node.js', level: 85, category: '后端开发' },
+  { id: 'skill6', name: 'MySQL', level: 80, category: '数据库' },
+  { id: 'skill7', name: 'MongoDB', level: 75, category: '数据库' },
+  { id: 'skill8', name: 'Webpack', level: 88, category: '工程化' },
+  { id: 'skill9', name: 'Vite', level: 85, category: '工程化' },
+  { id: 'skill10', name: 'Git', level: 90, category: '工具' },
+  { id: 'skill11', name: 'Docker', level: 78, category: '工具' },
+  { id: 'skill12', name: 'CSS/Sass', level: 92, category: '前端框架' }
 ]
+
+// 默认技能（精简版，用于兼容）
+export const defaultSkills: Skill[] = defaultSkillsExtended
 
 // 默认证书
 export const defaultCertificates: Certificate[] = [
@@ -155,7 +168,176 @@ export const defaultCertificates: Certificate[] = [
   }
 ]
 
-// 默认简历数据
+// 图表模板
+export const chartTemplates: ChartTemplate[] = [
+  {
+    id: 'radar-skills',
+    type: 'radar',
+    name: '技能雷达图',
+    description: '展示各技能维度的掌握程度',
+    icon: 'Radar',
+    defaultConfig: {
+      type: 'radar',
+      indicators: [],
+      showLegend: false,
+      showLabel: true
+    },
+    defaultDataBinding: {
+      source: 'skills',
+      fields: {
+        name: 'name',
+        value: 'level',
+        category: 'category'
+      }
+    }
+  },
+  {
+    id: 'timeline-career',
+    type: 'timeline',
+    name: '职业晋升时间线',
+    description: '可视化工作经历和职业发展',
+    icon: 'Clock',
+    defaultConfig: {
+      type: 'timeline',
+      orientation: 'vertical',
+      showDate: true,
+      showCompany: true
+    },
+    defaultDataBinding: {
+      source: 'workExperience',
+      fields: {
+        name: 'position',
+        date: 'startDate',
+        description: 'company',
+        category: 'current'
+      }
+    }
+  },
+  {
+    id: 'bar-projects',
+    type: 'bar',
+    name: '项目成果柱状图',
+    description: '对比各项目的关键指标',
+    icon: 'DataLine',
+    defaultConfig: {
+      type: 'bar',
+      xAxisField: 'name',
+      yAxisField: 'highlights',
+      showGrid: true,
+      showValue: true,
+      barWidth: 40
+    },
+    defaultDataBinding: {
+      source: 'projects',
+      fields: {
+        name: 'name',
+        value: 'highlights',
+        category: 'role'
+      }
+    }
+  },
+  {
+    id: 'heatmap-skills',
+    type: 'heatmap',
+    name: '技能掌握度热力图',
+    description: '按分类和熟练度展示技能分布',
+    icon: 'Histogram',
+    defaultConfig: {
+      type: 'heatmap',
+      xField: 'category',
+      yField: 'name',
+      valueField: 'level',
+      colorScheme: 'blue'
+    },
+    defaultDataBinding: {
+      source: 'skills',
+      fields: {
+        name: 'name',
+        value: 'level',
+        category: 'category'
+      }
+    }
+  },
+  {
+    id: 'dashboard-custom',
+    type: 'dashboard',
+    name: '自定义仪表盘',
+    description: '自由组合多个数据指标',
+    icon: 'Odometer',
+    defaultConfig: {
+      type: 'dashboard',
+      metrics: [],
+      layout: 'grid',
+      columns: 3
+    },
+    defaultDataBinding: {
+      source: 'basicInfo',
+      fields: {}
+    }
+  }
+]
+
+// 默认图表数据
+export const defaultCharts: Chart[] = [
+  {
+    id: 'chart1',
+    type: 'radar',
+    title: '技能雷达图',
+    description: '核心技能维度分析',
+    dataBinding: {
+      source: 'skills',
+      fields: {
+        name: 'name',
+        value: 'level',
+        category: 'category'
+      },
+      filter: {
+        limit: 6
+      }
+    },
+    config: {
+      type: 'radar',
+      indicators: [],
+      showLegend: false,
+      showLabel: true
+    },
+    width: 100,
+    height: 320,
+    visible: true,
+    order: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'chart2',
+    type: 'timeline',
+    title: '职业发展时间线',
+    description: '工作经历可视化',
+    dataBinding: {
+      source: 'workExperience',
+      fields: {
+        name: 'position',
+        date: 'startDate',
+        description: 'company',
+        category: 'current'
+      }
+    },
+    config: {
+      type: 'timeline',
+      orientation: 'vertical',
+      showDate: true,
+      showCompany: true
+    },
+    width: 100,
+    height: 280,
+    visible: true,
+    order: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+]
+
+// 更新默认简历数据中的技能和图表
 export const defaultResumeData: ResumeData = {
   basicInfo: {
     name: '张三',
@@ -170,9 +352,10 @@ export const defaultResumeData: ResumeData = {
   education: defaultEducation,
   workExperience: defaultWorkExperience,
   projects: defaultProjects,
-  skills: defaultSkills,
+  skills: defaultSkillsExtended,
   certificates: defaultCertificates,
   modules: defaultModules,
+  charts: defaultCharts,
   template: 'modern'
 }
 

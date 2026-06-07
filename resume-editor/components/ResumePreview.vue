@@ -193,6 +193,23 @@
                 </section>
               </template>
             </div>
+            
+            <!-- 数据可视化图表区域 -->
+            <div v-if="resumeStore.sortedCharts.length > 0" class="charts-section">
+              <section v-for="chart in resumeStore.sortedCharts" :key="chart.id" class="resume-section chart-section">
+                <h2 class="section-title">{{ chart.title }}</h2>
+                <div v-if="chart.description" class="chart-description">{{ chart.description }}</div>
+                <div class="chart-wrapper" :style="{ width: chart.width + '%', height: chart.height + 'px' }">
+                  <ClientOnly>
+                    <ChartRenderer 
+                      :chart="chart" 
+                      :resume-data="resumeStore.resumeData"
+                      @data-point-click="handleChartClick"
+                    />
+                  </ClientOnly>
+                </div>
+              </section>
+            </div>
           </div>
         </div>
       </ClientOnly>
@@ -204,10 +221,15 @@
 import { ref, computed } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import type { ResumeModule } from '@/types/resume'
+import ChartRenderer from './charts/ChartRenderer.vue'
 
 const resumeStore = useResumeStore()
 const zoomLevel = ref(0.75)
 const previewRef = ref<HTMLElement | null>(null)
+
+function handleChartClick(event: any) {
+  console.log('Chart clicked:', event)
+}
 
 const currentTemplate = computed(() => {
   if (!resumeStore.resumeData || !resumeStore.templates?.length) return null
@@ -833,6 +855,25 @@ const visibleSideModules = computed(() => {
       .cert-issuer {
         font-size: 10.5px;
         color: $color-gray-500;
+      }
+    }
+  }
+  
+  .charts-section {
+    margin-top: 6mm;
+    
+    .chart-section {
+      .chart-description {
+        font-size: 11px;
+        color: $color-gray-500;
+        margin-bottom: 3mm;
+      }
+      
+      .chart-wrapper {
+        background: $color-white;
+        border-radius: 2mm;
+        overflow: hidden;
+        margin-top: 2mm;
       }
     }
   }

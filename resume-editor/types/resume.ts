@@ -98,6 +98,7 @@ export interface ResumeData {
   skills: Skill[]
   certificates: Certificate[]
   modules: ResumeModule[]
+  charts: Chart[]
   template: TemplateType
 }
 
@@ -153,4 +154,126 @@ export interface VersionCompareResult {
     removed: number
     modified: number
   }
+}
+
+// ==================== 数据可视化图表类型 ====================
+
+// 图表类型枚举
+export type ChartType = 'radar' | 'timeline' | 'bar' | 'heatmap' | 'dashboard'
+
+// 数据绑定字段路径
+export type DataFieldPath = 
+  | 'skills'
+  | 'workExperience'
+  | 'projects'
+  | 'education'
+  | 'certificates'
+  | 'basicInfo'
+
+// 图表数据绑定配置
+export interface DataBindingConfig {
+  source: DataFieldPath
+  fields: {
+    name?: string
+    value?: string
+    category?: string
+    date?: string
+    description?: string
+  }
+  filter?: {
+    category?: string
+    limit?: number
+  }
+}
+
+// 雷达图配置
+export interface RadarChartConfig {
+  type: 'radar'
+  indicators: Array<{
+    name: string
+    max: number
+  }>
+  showLegend: boolean
+  showLabel: boolean
+}
+
+// 时间线图配置
+export interface TimelineChartConfig {
+  type: 'timeline'
+  orientation: 'horizontal' | 'vertical'
+  showDate: boolean
+  showCompany: boolean
+}
+
+// 柱状图配置
+export interface BarChartConfig {
+  type: 'bar'
+  xAxisField: string
+  yAxisField: string
+  showGrid: boolean
+  showValue: boolean
+  barWidth: number
+}
+
+// 热力图配置
+export interface HeatmapChartConfig {
+  type: 'heatmap'
+  xField: string
+  yField: string
+  valueField: string
+  colorScheme: 'blue' | 'green' | 'orange' | 'purple'
+}
+
+// 仪表盘指标
+export interface DashboardMetric {
+  id: string
+  title: string
+  value: number | string
+  target?: number
+  unit?: string
+  icon?: string
+  dataBinding?: DataBindingConfig
+}
+
+// 仪表盘配置
+export interface DashboardChartConfig {
+  type: 'dashboard'
+  metrics: DashboardMetric[]
+  layout: 'grid' | 'flex'
+  columns: 2 | 3 | 4
+}
+
+// 图表配置联合类型
+export type ChartConfig = 
+  | RadarChartConfig 
+  | TimelineChartConfig 
+  | BarChartConfig 
+  | HeatmapChartConfig 
+  | DashboardChartConfig
+
+// 图表实例
+export interface Chart {
+  id: string
+  type: ChartType
+  title: string
+  description: string
+  dataBinding: DataBindingConfig
+  config: ChartConfig
+  width: number
+  height: number
+  visible: boolean
+  order: number
+  createdAt: string
+  updatedAt: string
+}
+
+// 图表模板定义
+export interface ChartTemplate {
+  id: string
+  type: ChartType
+  name: string
+  description: string
+  icon: string
+  defaultConfig: ChartConfig
+  defaultDataBinding: DataBindingConfig
 }

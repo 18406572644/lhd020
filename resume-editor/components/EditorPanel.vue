@@ -29,6 +29,10 @@
         <el-tab-pane label="证书资质" name="certificate">
           <CertificateEditor />
         </el-tab-pane>
+        
+        <el-tab-pane label="数据可视化" name="charts">
+          <ChartEditor />
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -36,6 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import ChartEditor from './ChartEditor.vue'
 
 const activeTab = ref('basic')
 </script>
